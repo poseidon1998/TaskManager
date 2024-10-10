@@ -1,0 +1,1 @@
+mysql -u root -h localhost -p admin@123 $1 < $2

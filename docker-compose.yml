@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+
+  mongodb:
+    image: mongo:6.0   
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_DATABASE: PROD_V1      
+      MONGO_INITDB_ROOT_USERNAME: sasi  
+      MONGO_INITDB_ROOT_PASSWORD: Admin 
+    ports:
+      - "${DOCKER_IP}:27017:27017"  
+    volumes:
+      - ./mongo_data:/data/db  
+    networks:
+      - mongonetwork
+    restart: always
+    
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: sasi
+      ME_CONFIG_MONGODB_ADMINPASSWORD: Admin
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    ports:
+      - "${DOCKER_IP}:8081:8081"
+    depends_on:
+      - mongodb
+    networks:
+      - mongonetwork
+    restart: always
+
+  taskmanager_web:  
+    container_name: taskmanager_web
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:            
+      - ./apps/:/TaskManager/apps/
+    ports: 
+      - "${DOCKER_IP}:8000:8000"
+      - "${DOCKER_IP}:80:80"
+      - "${DOCKER_IP}:81:81"
+      - "${DOCKER_IP}:82:82"
+    depends_on:
+      - mongodb
+    networks:
+      - mongonetwork
+    restart: always
+
+networks:
+  mongonetwork:
+    driver: bridge 
